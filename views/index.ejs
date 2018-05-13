@@ -1,0 +1,275 @@
+<!-- https://codepen.io/fuggfuggfugg/pen/mqdBH -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Youtube-Sync</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/main.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="col" style="font-size:  0;">
+          <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+          <div id="player"></div>
+          <div id="playercontrols" class="bg-dark" style="width: 720px;">
+            <div class="progressBar w-100" data-toggle="tooltip" title="Some tooltip text!">
+              <div class="progress"></div>
+              <div class="buffer"></div>
+            </div>
+            <div class="btn-group">
+              <button type="button" class="btn btn-dark" onclick="playVideo();"><i class="fas fa-play"></i></button>
+              <button type="button" class="btn btn-dark" onclick="pauseVideo();"><i class="fas fa-pause"></i></button>
+            </div>
+            <div class="d-inline align-middle playertime">
+              <span class="currenttime">00:00</span>
+              <span>/</span>
+              <span class="totaltime">00:00</span>
+            </div>
+          </div>
+        </div><!-- /.col -->
+        <div class="col">
+          <div class="chat-container w-100 h-100" style="position:  sticky;">
+            <ul id="messages"></ul>
+            <div class="input-group" style="position: absolute; bottom: 0;">
+              <input type="text" class="form-control messageBox" placeholder="message..." aria-label="message">
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary btnSendMessage" type="button"><i class="fas fa-comment-alt"></i></button>
+              </div>
+            </div>
+          </div>
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script>
+      function progressBarLoop() {
+        var progressBar = $('.progressBar');
+        var progress = $('.progress');
+        setInterval(function() {
+          if(player == null || progressBar == null) {
+            return;
+          }
+
+          if($('.progressBar').is(":hover") == false) {
+            var fraction = player.getCurrentTime()/player.getDuration()*100;
+            progress.css("width", fraction.toString() + "%");
+            $('.currenttime').text(convertToTime(player.getCurrentTime()));
+            // console.log(player.getCurrentTime());
+          }
+        }, 200);
+
+        var buffer = $('.buffer');
+        setInterval(function() {
+          if(player == null || buffer == null) {
+            return;
+          }
+          var fraction = player.getVideoLoadedFraction()*100;
+          buffer.css("width", fraction.toString() + "%");
+
+          if(player.getVideoLoadedFraction() == 1.0) {
+            return;
+          }
+          // console.log(player.getCurrentTime());
+        }, 200);
+      }
+
+      function convertToTime(s) {
+        var h = Math.floor(s/3600); //Get whole hours
+        s -= h*3600;
+        var m = Math.floor(s/60); //Get remaining minutes
+        s -= m*60;
+
+        s = Math.floor(s);
+
+        return (h > 0 ) ? h+':' : '' + (m < 10 ? '0'+m : m)+":"+(s < 10 ? '0'+s : s); //zero padding on minutes and seconds
+      }
+    </script>
+
+    <script>
+      // 2. This code loads the IFrame Player API code asynchronously.
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      // 3. This function creates an <iframe> (and YouTube player)
+      //    after the API code downloads.
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '480',
+          width: '720',
+          videoId: '8TUuQTToPoA',
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          },
+          playerVars: {
+            controls: 0,
+            disablekb: 1,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0
+          }
+        });
+      }
+
+      // 4. The API will call this function when the video player is ready.
+      function onPlayerReady(event) {
+        progressBarLoop();
+        $('.totaltime').text(convertToTime(player.getDuration()));
+        //event.target.playVideo();
+      }
+
+      // 5. The API calls this function when the player's state changes.
+      //    The function indicates that when playing a video (state=1),
+      //    the player should play for six seconds and then stop.
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.PLAYING) {
+          socket.emit('playerEvent', 'play');
+        }
+        if (event.data == YT.PlayerState.PAUSED) {
+          socket.emit('playerEvent', 'pause');
+        }
+      }
+
+      // Player Controls
+      function playVideo() {
+        socket.emit('playerEvent', 'play');
+      }
+
+      function pauseVideo() {
+        socket.emit('playerEvent', 'pause');
+      }
+
+      function stopVideo() {
+        player.stopVideo();
+        socket.emit('playerEvent', 'stop');
+      }
+
+
+    </script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+    <!-- Socket IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.js"></script>
+    <script>
+      var socket = io.connect('http://127.0.0.1:3000');
+
+      socket.on('playerEvent', function(msg) {
+        if(msg == "play") {
+          player.playVideo();
+        } else if(msg == "pause") {
+          player.pauseVideo();
+        }
+      });
+
+      socket.on('chat message', function(msg){
+        $('#messages').append($('<li>').text(msg));
+        $('#messages').animate({
+          scrollTop: $('#messages').prop("scrollHeight")
+        }, 500);
+      });
+
+      socket.on('seekEvent', function(msg) {
+        player.seekTo(msg);
+      });
+
+
+    </script>
+    <script>
+      // Chat box
+      $('.btnSendMessage').click(function() {
+        var msg = $('.messageBox').val();
+        if(msg.length > 0) {
+          socket.emit('chat message', msg);
+          $('.messageBox').val('');
+        }
+      });
+
+      $(".messageBox").keyup(function(event) {
+        if (event.keyCode === 13) {
+            $(".btnSendMessage").click();
+        }
+    });
+
+    $('.progressBar').tooltip();
+
+    $( ".progressBar" ).mouseenter(function() {
+      var $this = $(this);
+      $this.animate({height: $this.height($this.height() + 5) + "%" }, 500);
+    });
+
+    $( ".progressBar" ).mouseleave(function() {
+      var $this = $(this);
+      $this.animate({height: $this.height($this.height() - 5) + "%" }, 500);
+    });
+
+    $( ".progressBar" ).mousemove(function( event ) {
+      var $this = $(this);
+
+      // to get part of width of progress bar clicked
+      var widthclicked = event.pageX - $this.offset().left;
+      var totalWidth = $this.width(); // can also be cached somewhere in the app if it doesn't change
+
+      // do calculation of the seconds clicked
+      var calc = (widthclicked / totalWidth * player.getDuration()); // get the percent of bar clicked and multiply in by the duration
+      var calc_fix = calc.toFixed(0);
+
+      var barwidth = calc_fix/player.getDuration()*100;
+
+      $( ".progress" ).css("width", barwidth.toString() + "%");
+
+      $(this).tooltip('hide').attr('data-original-title', convertToTime(calc_fix)).tooltip('show');
+      //console.log(calc_fix + " " + barwidth);
+    });
+
+    $( ".progressBar" ).click(function( event ) {
+      var $this = $(this);
+
+      // to get part of width of progress bar clicked
+      var widthclicked = event.pageX - $this.offset().left;
+      var totalWidth = $this.width(); // can also be cached somewhere in the app if it doesn't change
+
+      // do calculation of the seconds clicked
+      var calc = (widthclicked / totalWidth * player.getDuration()); // get the percent of bar clicked and multiply in by the duration
+      var calc_fix = calc.toFixed(0);
+      //var time = convert_time(calc_fix);
+
+      //console.log(time + " - " + widthclicked);
+      console.log(convertToTime(calc_fix));
+
+      socket.emit("seekEvent", calc_fix);
+    });
+    </script>
+  </body>
+</html>
