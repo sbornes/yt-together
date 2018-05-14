@@ -31,6 +31,14 @@ io.on('connection', function(socket) {
     console.log(time);
     io.emit('seekEvent', time);
   });
+<<<<<<< HEAD
+=======
+  socket.on('change video', function(id) {
+    console.log(id);
+    io.emit('change video', id);
+  });
+
+>>>>>>> fabc966bd250ff56a91db01537c4d73ee864c986
   console.log('a user connected');
 });
 
