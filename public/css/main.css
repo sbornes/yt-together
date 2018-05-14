@@ -56,8 +56,6 @@ form {
 #messages li:nth-child(odd) {
   background: #2F3238;
 }
-<<<<<<< HEAD
-=======
 
 .player-wrapper {
     float: none;
@@ -79,4 +77,3 @@ form {
 .room-info {
   background: #343a40;
 }
->>>>>>> fabc966bd250ff56a91db01537c4d73ee864c986

@@ -1,10 +1,5 @@
 {
-<<<<<<< HEAD
-  "name": "Node.js template",
-  "description": "A barebones Node.js app using Express 4",
-=======
   "name": "yt-together",
   "description": "Webb app to watch youtube together",
->>>>>>> fabc966bd250ff56a91db01537c4d73ee864c986
   "keywords": ["node", "express", "heroku"]
 }
