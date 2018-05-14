@@ -31,6 +31,11 @@ io.on('connection', function(socket) {
     console.log(time);
     io.emit('seekEvent', time);
   });
+  socket.on('change video', function(id) {
+    console.log(id);
+    io.emit('change video', id);
+  });
+
   console.log('a user connected');
 });
 

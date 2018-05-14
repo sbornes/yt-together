@@ -29,11 +29,34 @@
   <body>
 
     <div class="container">
+      <div class="row mb-3">
+        <div class="col-12 col-md-8">
+          <div class="input-group">
+            <input type="text" id="youtube-url" class="form-control" placeholder="youtube url..." aria-label="youtube-url">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary btnYtUrl" type="button"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="room-info d-flex justify-content-between">
+            <span><i class="fas fa-video"></i> 10 </span>
+            <span class="text-muted">Room#2462</span>
+
+          </div>
+
+
+        </div>
+      </div>
       <div class="row">
-        <div class="col" style="font-size:  0;">
+        <div class="col-12 col-md-8" style="font-size:  0;">
           <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
-          <div id="player"></div>
-          <div id="playercontrols" class="bg-dark" style="width: 720px;">
+          <div class="player-wrapper">
+            <div id="player"></div>
+          </div>
+
+          <!-- <div id="playercontrols" class="bg-dark"  style="width: 720px;"> -->
+          <div id="playercontrols" class="bg-dark">
             <div class="progressBar w-100" data-toggle="tooltip" title="Some tooltip text!">
               <div class="progress"></div>
               <div class="buffer"></div>
@@ -49,7 +72,7 @@
             </div>
           </div>
         </div><!-- /.col -->
-        <div class="col">
+        <div class="col-12 col-md-4">
           <div class="chat-container w-100 h-100" style="position:  sticky;">
             <ul id="messages"></ul>
             <div class="input-group" style="position: absolute; bottom: 0;">
@@ -204,9 +227,36 @@
         player.seekTo(msg);
       });
 
+      socket.on('change video', function(id) {
+        player.cueVideoById(id);
+      });
+
 
     </script>
     <script>
+      // YT Url box
+      $('.btnYtUrl').click(function() {
+        var id = YouTubeGetID($('#youtube-url').val());
+
+        console.log("ID is " + id);
+
+        if(id.length > 0) {
+          socket.emit('change video', id);
+        }
+      });
+
+      function YouTubeGetID(url) {
+        var ID = '';
+        url = url.replace(/(>|<)/gi,'').split(/(vi\/|v=|\/v\/|youtu\.be\/|\/embed\/)/);
+        if(url[2] !== undefined) {
+          ID = url[2].split(/[^0-9a-z_\-]/i);
+          ID = ID[0];
+        }
+        else {
+          ID = url;
+        }
+          return ID;
+      }
       // Chat box
       $('.btnSendMessage').click(function() {
         var msg = $('.messageBox').val();
