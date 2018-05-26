@@ -21,6 +21,10 @@ body {
   font-size: 14px;
 }
 
+.img-tooltip {
+  position: absolute;
+}
+
 .progressBar {
   background-color: #2F3238;
   height: 5px;
@@ -42,10 +46,9 @@ form {
 }
 
 #messages {
-  height: 480px;
+  /* height: 480px; */
   list-style-type: none;
   margin: 0;
-  overflow-y: scroll;
   padding: 0;
 }
 

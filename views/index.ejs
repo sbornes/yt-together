@@ -29,6 +29,9 @@
   <body>
 
     <div class="container">
+      <!-- <div class="header-img">
+        <img src="asset/youtube-sync-3.png">
+      </div> -->
       <div class="row mb-3">
         <div class="col-12 col-md-8">
           <div class="input-group">
@@ -57,7 +60,8 @@
 
           <!-- <div id="playercontrols" class="bg-dark"  style="width: 720px;"> -->
           <div id="playercontrols" class="bg-dark">
-            <div class="progressBar w-100" data-toggle="tooltip" title="Some tooltip text!">
+            <div class="progressBar w-100" >
+              <i class="img-tooltip" data-toggle="tooltip" data-html="false" data-placement="top" title="Tooltip 1" data-animation="false" data-trigger="manual"></i>
               <div class="progress"></div>
               <div class="buffer"></div>
             </div>
@@ -73,7 +77,38 @@
           </div>
         </div><!-- /.col -->
         <div class="col-12 col-md-4">
-          <div class="chat-container w-100 h-100" style="position:  sticky;">
+          <div class="card bg-dark" style="max-height: 480px; overflow: auto;">
+            <div class="card-header">
+              NAME
+            </div>
+            <div class="card-body p-0" style="overflow: auto; height: 400px;">
+              <ul id="messages"></ul>
+            </div>
+            <div class="card-footer text-muted p-0">
+              <div class="input-group">
+                <input type="text" class="form-control messageBox" placeholder="message..." aria-label="message">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary btnSendMessage" type="button"><i class="fas fa-comment-alt"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        <!--
+        <div class="col-12 col-md-4">
+          <div class="message-area">
+            <ul id="messages"></ul>
+          </div>
+
+          <div class="input-area">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="message..." aria-label="message">
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button"><i class="fas fa-comment-alt"></i></button>
+              </div>
+            </div>
+          </div>
+        -->
+          <!-- <div class="chat-container w-100 h-100" style="position:  sticky;">
             <ul id="messages"></ul>
             <div class="input-group" style="position: absolute; bottom: 0;">
               <input type="text" class="form-control messageBox" placeholder="message..." aria-label="message">
@@ -81,7 +116,7 @@
                 <button class="btn btn-outline-secondary btnSendMessage" type="button"><i class="fas fa-comment-alt"></i></button>
               </div>
             </div>
-          </div>
+          </div> -->
         </div><!-- /.col -->
       </div><!-- /.row -->
     </div><!-- /.container -->
@@ -205,6 +240,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
     <!-- Socket IO -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.js"></script>
+
     <script>
       var socket = io.connect('http://127.0.0.1:3000');
 
@@ -218,8 +254,8 @@
 
       socket.on('chat message', function(msg){
         $('#messages').append($('<li>').text(msg));
-        $('#messages').animate({
-          scrollTop: $('#messages').prop("scrollHeight")
+        $('#messages').parent().animate({
+          scrollTop: $('#messages').parent().prop("scrollHeight")
         }, 500);
       });
 
@@ -272,7 +308,7 @@
         }
     });
 
-    $('.progressBar').tooltip();
+    // $('.progressBar').tooltip();
 
     $( ".progressBar" ).mouseenter(function() {
       var $this = $(this);
@@ -282,6 +318,7 @@
     $( ".progressBar" ).mouseleave(function() {
       var $this = $(this);
       $this.animate({height: $this.height($this.height() - 5) + "%" }, 500);
+      $(".img-tooltip").tooltip('hide');
     });
 
     $( ".progressBar" ).mousemove(function( event ) {
@@ -299,8 +336,17 @@
 
       $( ".progress" ).css("width", barwidth.toString() + "%");
 
-      $(this).tooltip('hide').attr('data-original-title', convertToTime(calc_fix)).tooltip('show');
+      $(".img-tooltip").css({
+        /* top: (e.pageY + top), */
+        left: (widthclicked)
+      });
+
+
+      $(".img-tooltip").tooltip('hide').attr('data-original-title', convertToTime(calc_fix)).tooltip('show');
       //console.log(calc_fix + " " + barwidth);
+
+
+
     });
 
     $( ".progressBar" ).click(function( event ) {
